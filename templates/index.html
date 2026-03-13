@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cisco SG300-28 Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="6" width="20" height="12" rx="2"/>
+          <line x1="6" y1="10" x2="6" y2="14"/>
+          <line x1="10" y1="10" x2="10" y2="14"/>
+          <line x1="14" y1="10" x2="14" y2="14"/>
+          <line x1="18" y1="10" x2="18" y2="14"/>
+          <circle cx="6" cy="12" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Cisco SG300-28</h1>
+        <span class="header-sub">Network Monitor</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Desconectado</span>
+      </div>
+      <div class="last-update" id="lastUpdate">—</div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Connect Panel -->
+    <section class="connect-panel" id="connectPanel">
+      <div class="connect-card">
+        <div class="connect-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+            <circle cx="12" cy="20" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <h2>Conectar al Switch</h2>
+        <p>Ingresa la IP del Cisco SG300-28 y la comunidad SNMP</p>
+        <form class="connect-form" id="connectForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>IP / Hostname</label>
+              <input type="text" id="hostInput" placeholder="192.168.1.254" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label>Comunidad SNMP</label>
+              <input type="text" id="communityInput" value="public" autocomplete="off" />
+            </div>
+          </div>
+          <button type="submit" class="btn-connect" id="connectBtn">
+            <span class="btn-text">Conectar</span>
+            <span class="btn-spinner" style="display:none">⟳</span>
+          </button>
+        </form>
+        <div class="connect-error" id="connectError"></div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard" style="display:none">
+
+      <!-- Top bar -->
+      <div class="dash-topbar">
+        <div class="sysinfo">
+          <span class="sysinfo-name" id="sysName">—</span>
+          <span class="sysinfo-desc" id="sysDescr">—</span>
+        </div>
+        <button class="btn-disconnect" id="disconnectBtn">✕ Desconectar</button>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-uptime">⏱</div>
+          <div class="stat-body">
+            <div class="stat-label">Uptime</div>
+            <div class="stat-value" id="statUptime">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-cpu">⚡</div>
+          <div class="stat-body">
+            <div class="stat-label">CPU</div>
+            <div class="stat-value" id="statCpu">—</div>
+          </div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar" id="cpuBar"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-mem">💾</div>
+          <div class="stat-body">
+            <div class="stat-label">Memoria</div>
+            <div class="stat-value" id="statMem">—</div>
+          </div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar mem-bar" id="memBar"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-ports">🔌</div>
+          <div class="stat-body">
+            <div class="stat-label">Puertos Activos</div>
+            <div class="stat-value" id="statPorts">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CPU chart -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <span class="card-title">CPU — Últimos 60 ciclos</span>
+          <span class="card-badge" id="cpuBadge">0%</span>
+        </div>
+        <canvas id="cpuChart" height="90"></canvas>
+      </div>
+
+      <!-- Port panel -->
+      <div class="card ports-card">
+        <div class="card-header">
+          <span class="card-title">Estado de Puertos</span>
+          <div class="port-legend">
+            <span class="leg-up">▲ Activo</span>
+            <span class="leg-down">▼ Inactivo</span>
+            <span class="leg-admin">◉ Admin-down</span>
+          </div>
+        </div>
+        <!-- Visual port panel 28 ports -->
+        <div class="port-visual" id="portVisual"></div>
+      </div>
+
+      <!-- Interface table -->
+      <div class="card table-card">
+        <div class="card-header">
+          <span class="card-title">Estadísticas de Interfaces</span>
+          <input type="text" class="table-search" id="tableSearch" placeholder="🔍 Filtrar…" />
+        </div>
+        <div class="table-wrap">
+          <table class="iface-table" id="ifaceTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Interfaz</th>
+                <th>Admin</th>
+                <th>Estado</th>
+                <th>Velocidad</th>
+                <th>RX (Mbps)</th>
+                <th>TX (Mbps)</th>
+                <th>Err RX</th>
+                <th>Err TX</th>
+              </tr>
+            </thead>
+            <tbody id="ifaceBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+  </main>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
